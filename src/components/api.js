@@ -20,16 +20,3 @@ export async function getImages({ query, page }) {
   const response = await axios.get('', { params });
   return response.data;
 };
-
-
-// async function getImages({ query, page }) {
-//   const params = {
-//     ...defaultParams,
-//     q: query,
-//     page: page,
-//   };
-
-//   const response = await axios.get('', { params });
-
-//   return response.data;
-// }

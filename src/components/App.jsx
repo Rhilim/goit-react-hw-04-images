@@ -1,109 +1,90 @@
-import { getImages } from 'api';
-import { Component } from 'react';
-import { Notify } from 'notiflix';
+import { getImages } from './api';
+import toast, { Toaster } from 'react-hot-toast';
 import { ImageGallery } from './ImageGallery/ImageGallery';
 import { Button } from './LoadMoreBtn/LoadMoreBtn';
 import { Searchbar } from './Searchbar.jsx/Searchbar';
 import { Loader } from './Loader/Loader';
 import { Wrapper } from './Wrapper';
+import { useEffect, useState } from 'react';
 
-export class App extends Component {
-  state = {
-    query: '',
-    images: [],
-    page: 1,
-    error: null,
-    isLoading: false,
-    totalImages: 0,
-  };
 
-  async componentDidUpdate(_, prevState) {
-    if (
-      prevState.query !== this.state.query ||
-      prevState.page !== this.state.page
-    ) {
-      this.fetchImages();
-    }
-  }
+export const App = () => {
+  const [query, setQuery] = useState('');
+  const [images, setImages] = useState([]);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(false);
+  const [totalImages, setTotalImages] = useState(0);
 
-  async fetchImages() {
-    const { query, page } = this.state;
+  useEffect(() => {
+    fetchImages();
+  }, [query, page]);
+
+  async function fetchImages() {
+    if (query === '') return;
     const options = { query, page };
 
     try {
-      this.setState({ isLoading: true });
+      setIsLoading(true);
 
       const { hits, totalHits } = await getImages(options);
 
-      const nextImages = hits.map(
-        ({ id, webformatURL, tags, largeImageURL }) => ({
-          id,
-          webformatURL,
-          tags,
-          largeImageURL,
-        })
-      );
+      const nextImages = hits.map(({ id, webformatURL, tags, largeImageURL }) => ({
+        id,
+        webformatURL,
+        tags,
+        largeImageURL,
+      }));
 
       if (page === 1) {
         if (!nextImages.length) {
-          Notify.failure(`There is no result for ${query}`);
+          toast.error(`There is no result for ${query}`);
           return;
         }
 
-        this.setState({ images: nextImages, totalImages: totalHits });
+        setImages(nextImages);
+        setTotalImages(totalHits);
       } else {
-        this.setState(({ images }) => ({
-          images: [...images, ...nextImages],
-        }));
+        setImages(prevImages => [...prevImages, ...nextImages]);
       }
 
-      this.checkLastPage({
-        page,
-        totalImages: totalHits,
-      });
+      checkLastPage(totalHits);
     } catch (error) {
-      this.setState({ error });
-      Notify.failure(error.message);
+      toast.error(error.message);
     } finally {
-      this.setState({ isLoading: false });
+      setIsLoading(false);
     }
   }
 
-  handleSubmit = value => {
-    this.setState({
-      images: [],
-      query: value,
-      page: 1,
-      totalImages: 0,
-    });
-  };
+  function handleSubmit(value) {
+    setImages([]);
+    setQuery(value);
+    setPage(1);
+    setTotalImages(0);
+  }
 
-  handleLoadMore = () => {
-    this.setState(prevState => ({ page: prevState.page + 1 }));
-  };
+  function handleLoadMore() {
+    setPage(prevPage => prevPage + 1);
+  }
 
-  checkLastPage({ page, totalImages }) {
-    const { query } = this.state;
+  function checkLastPage(totalImages) {
     const lastPage = Math.ceil(totalImages / 12);
 
     if (page === lastPage) {
-      Notify.success(`You have got all images for request ${query}`);
+      toast.success(`You have got all images for request ${query}`);
     }
   }
 
-  render() {
-    const { images, totalImages, isLoading } = this.state;
-    const loadMoreVisible =
-      !isLoading && images.length !== 0 && images.length < totalImages;
-    return (
-      <>
-        <Searchbar onSubmit={this.handleSubmit}></Searchbar>
-        <ImageGallery images={images}></ImageGallery>
-        <Wrapper>
-          {loadMoreVisible && <Button onClick={this.handleLoadMore} />}
-          {isLoading && <Loader />}
-        </Wrapper>
-      </>
-    );
-  }
+  const loadMoreVisible = !isLoading && images.length !== 0 && images.length < totalImages;
+
+  return (
+    <>
+      <Searchbar onSubmit={handleSubmit}></Searchbar>
+      <Toaster />
+      <ImageGallery images={images}></ImageGallery>
+      <Wrapper>
+        {loadMoreVisible && <Button onClick={handleLoadMore} />}
+        {isLoading && <Loader />}
+      </Wrapper>
+    </>
+  );
 }

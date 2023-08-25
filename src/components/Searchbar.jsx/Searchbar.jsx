@@ -1,56 +1,60 @@
-
-import React, { Component } from 'react';
-import { Notify } from 'notiflix';
+import { useState } from 'react';
+import toast, { Toaster } from 'react-hot-toast';
 import { ImSearch } from 'react-icons/im';
-import { SearchbarStyled, SearchForm, SearchFormBtn, SearchFormInput } from './Searchbar.styled';
+import {
+  SearchbarStyled,
+  SearchForm,
+  SearchFormBtn,
+  SearchFormInput,
+} from './Searchbar.styled';
 
-export class Searchbar extends Component  {
-  state = {
-        searchImage: '',
-      };
-      handleSubmit = e => {
-        const { searchImage } = this.state;
-    
-        e.preventDefault();
-    
-        if (searchImage.trim() === '') {
-          return Notify.failure('Please enter text for search images', {
-            timeout: 1000,
-          });
-        }
-    
-        this.props.onSubmit(searchImage);
-        this.setState({ searchImage: '' });
-      };
-    
-      handleChange = e => {
-        this.setState({ searchImage: e.currentTarget.value.toLowerCase() });
-      };
-    
-      render() {
-        const { searchImage } = this.state;
-    
-        return (
-          <SearchbarStyled>
-            <SearchForm onSubmit={this.handleSubmit}>
-              <SearchFormBtn type="submit">
-                <ImSearch />
-              </SearchFormBtn>
-    
-              <SearchFormInput
-                type="text"
-                value={searchImage}
-                autoComplete="off"
-                autoFocus
-                placeholder="Search images and photos"
-                onChange={this.handleChange}
-              ></SearchFormInput>
-            </SearchForm>
-          </SearchbarStyled>
-        );
-      }
+export const Searchbar = ({onSubmit}) => {
+  const [searchImage, setSearchImage] = useState('');
+
+  const handleSubmit = e => {
+    e.preventDefault();
+
+    if (searchImage.trim() === '') {
+      return toast.error('Please enter text for search images', {
+        duration: 2000,
+        position: 'top-center',
+        style: {
+          backgroundColor: 'orangered',
+          color: 'white',
+        },
+        ariaProps: {
+          role: 'status',
+          'aria-live': 'polite',
+        },
+      });
     }
+    else {
+      onSubmit(searchImage);
+      setSearchImage('');
+    }
+  };
 
+  const handleChange = (e) => 
+    setSearchImage(e.currentTarget.value.toLowerCase());
+  ;
 
+  return (
+    <SearchbarStyled>
+      <Toaster />
+      <SearchForm onSubmit={handleSubmit}>
+        <SearchFormBtn type="submit">
+          <ImSearch />
+        </SearchFormBtn>
 
-
+        <SearchFormInput
+          type="text"
+          value={searchImage}
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+          onChange={handleChange}
+        ></SearchFormInput>
+      </SearchForm>
+    </SearchbarStyled>
+  );
+};
