@@ -2,7 +2,7 @@
   "name": "react-homework-template",
   "version": "0.1.0",
   "private": true,
-  "homepage": "https://Rhilim.github.io/goit-react-hw-04-images /",
+  "homepage": "https://Rhilim.github.io/goit-react-hw-04-images/",
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
@@ -10,7 +10,6 @@
     "@testing-library/react": "^12.1.4",
     "@testing-library/user-event": "^13.5.0",
     "axios": "^1.4.0",
-    "notiflix": "^3.2.6",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
     "react-hot-toast": "^2.4.1",
