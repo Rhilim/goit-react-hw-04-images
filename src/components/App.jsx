@@ -7,7 +7,6 @@ import { Loader } from './Loader/Loader';
 import { Wrapper } from './Wrapper';
 import { useEffect, useState } from 'react';
 
-
 export const App = () => {
   const [query, setQuery] = useState('');
   const [images, setImages] = useState([]);
@@ -16,65 +15,58 @@ export const App = () => {
   const [totalImages, setTotalImages] = useState(0);
 
   useEffect(() => {
-    fetchImages();
-  }, [query, page]);
-
-  async function fetchImages() {
     if (query === '') return;
-    const options = { query, page };
-
-    try {
-      setIsLoading(true);
-
-      const { hits, totalHits } = await getImages(options);
-
-      const nextImages = hits.map(({ id, webformatURL, tags, largeImageURL }) => ({
-        id,
-        webformatURL,
-        tags,
-        largeImageURL,
-      }));
-
-      if (page === 1) {
-        if (!nextImages.length) {
-          toast.error(`There is no result for ${query}`);
-          return;
+    async function fetchImages() {
+      const options = { query, page };
+      try {
+        setIsLoading(true);
+        const { hits, totalHits } = await getImages(options);
+        const nextImages = hits.map(
+          ({ id, webformatURL, tags, largeImageURL }) => ({
+            id,
+            webformatURL,
+            tags,
+            largeImageURL,
+          })
+        );
+        if (page === 1) {
+          if (!nextImages.length) {
+            toast.error(`There is no result for ${query}`);
+            return;
+          }
+          setImages(nextImages);
+          setTotalImages(totalHits);
+        } else {
+          setImages(prevImages => [...prevImages, ...nextImages]);
         }
-
-        setImages(nextImages);
-        setTotalImages(totalHits);
-      } else {
-        setImages(prevImages => [...prevImages, ...nextImages]);
+      } catch (error) {
+        toast.error(error.message);
+      } finally {
+        setIsLoading(false);
       }
-
-      checkLastPage(totalHits);
-    } catch (error) {
-      toast.error(error.message);
-    } finally {
-      setIsLoading(false);
     }
-  }
 
-  function handleSubmit(value) {
+    fetchImages();
+
+    const lastPage = Math.ceil(totalImages / 12);
+    if (page === lastPage) {
+      toast.success(`You have got all images for request ${query}`);
+    }
+  }, [page, query, totalImages]);
+
+  const handleSubmit = value => {
     setImages([]);
     setQuery(value);
     setPage(1);
     setTotalImages(0);
-  }
+  };
 
-  function handleLoadMore() {
+  const handleLoadMore = () => {
     setPage(prevPage => prevPage + 1);
-  }
+  };
 
-  function checkLastPage(totalImages) {
-    const lastPage = Math.ceil(totalImages / 12);
-
-    if (page === lastPage) {
-      toast.success(`You have got all images for request ${query}`);
-    }
-  }
-
-  const loadMoreVisible = !isLoading && images.length !== 0 && images.length < totalImages;
+  const loadMoreVisible =
+    !isLoading && images.length !== 0 && images.length < totalImages;
 
   return (
     <>
@@ -87,4 +79,4 @@ export const App = () => {
       </Wrapper>
     </>
   );
-}
+};
