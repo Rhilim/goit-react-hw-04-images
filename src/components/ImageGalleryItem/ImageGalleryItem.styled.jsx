@@ -7,13 +7,14 @@ export const Item = styled.li`
 `;
 
 export const Image = styled.img`
+  z-index: 4000;
   width: 100%;
   height: 260px;
   object-fit: cover;
   transition: transform 250ms cubic-bezier(0.4, 0, 0.2, 1);
-
   :hover {
-    transform: scale(1.03);
-    cursor: zoom-in;
+    transform: scale(0.97);
+    cursor: zoom-out;
   }
 `;
+

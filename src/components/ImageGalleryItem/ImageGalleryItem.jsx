@@ -3,6 +3,9 @@ import Modal from 'react-modal';
 import { Image, Item } from './ImageGalleryItem.styled';
 
 const customStyles = {
+  overlay: {
+    zIndex: '2000',
+  },
   content: {
     top: '50%',
     left: '50%',
